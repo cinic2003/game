@@ -1,0 +1,6 @@
+Gemfile.lock
+config/database.yml
+db/schema.rb
+db/*.sqlite3
+log/*.log
+tmp
