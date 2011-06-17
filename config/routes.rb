@@ -1,4 +1,6 @@
 Game::Application.routes.draw do
+  resources :swfs
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

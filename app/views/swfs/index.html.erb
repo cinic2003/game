@@ -1,0 +1,27 @@
+<h1>Listing swfs</h1>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Web</th>
+    <th>Url</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @swfs.each do |swf| %>
+  <tr>
+    <td><%= swf.name %></td>
+    <td><%= swf.web %></td>
+    <td><%= swf.url %></td>
+    <td><%= link_to 'Show', swf %></td>
+    <td><%= link_to 'Edit', edit_swf_path(swf) %></td>
+    <td><%= link_to 'Destroy', swf, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Swf', new_swf_path %>

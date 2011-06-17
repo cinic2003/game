@@ -1,0 +1,20 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Name:</b>
+  <%= @swf.name %>
+</p>
+
+<p>
+  <b>Web:</b>
+  <%= @swf.web %>
+</p>
+
+<p>
+  <b>Url:</b>
+  <%= @swf.url %>
+</p>
+
+
+<%= link_to 'Edit', edit_swf_path(@swf) %> |
+<%= link_to 'Back', swfs_path %>
