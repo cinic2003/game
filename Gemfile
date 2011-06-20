@@ -11,6 +11,9 @@ gem 'mechanize'
 
 gem 'nokogiri'
 
+gem 'resque'
+
+gem 'SystemTimer'
 
 # Use unicorn as the web server
 # gem 'unicorn'
