@@ -11,9 +11,15 @@ gem 'mechanize'
 
 gem 'nokogiri'
 
-gem 'resque'
+gem 'resque', :require => 'resque/server'
 
 gem 'SystemTimer'
+
+gem 'whenever'
+
+gem 'will_paginate' , '~> 2.3.15'
+
+gem 'paperclip'
 
 # Use unicorn as the web server
 # gem 'unicorn'

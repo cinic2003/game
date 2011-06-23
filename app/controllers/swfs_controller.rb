@@ -1,8 +1,16 @@
 class SwfsController < ApplicationController
+  
+  def download_swf
+    @swf = Swf.find params[:id]
+    Resque.enqueue(DownFlash, @swf.id)
+    redirect_to @swf, :notice => "Download this flash"
+  end
+
+
   # GET /swfs
   # GET /swfs.xml
   def index
-    @swfs = Swf.all
+    @swfs = Swf.all.paginate :per_page => 20, :page => params[:page], :limit => 50
 
     respond_to do |format|
       format.html # index.html.erb

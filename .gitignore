@@ -7,4 +7,5 @@ log/*.log
 tmp/
 test/
 test/*/
-lib/.*
+public/flash/
+public/image/

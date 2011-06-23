@@ -16,4 +16,9 @@ namespace :app do
       end
     end
   end
+
+  desc 'whenever task test'
+  task :whenever_test => :environment do 
+    puts 'This is a whenever test'
+  end
 end
