@@ -15,7 +15,7 @@
 #
 
 every 1.days do
-  rake "app:whenever_test"
+  rake "app:download_swf"
 end
 
 # Learn more: http://github.com/javan/whenever

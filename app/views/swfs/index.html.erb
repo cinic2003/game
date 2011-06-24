@@ -1,5 +1,8 @@
 <h1>Listing swfs</h1>
 
+<%= form_tag '/swfs', :method => :get do %>
+  <%= text_field_tag 'search' %> <%= submit_tag 'Search' %>
+<% end %>
 <table>
   <tr>
     <th>Name</th>
@@ -14,9 +17,12 @@
 <% @swfs.each do |swf| %>
 <%= form_tag download_swf_swfs_path(:id => swf.id) do %>
   <tr>
-    <td><%= swf.name %></td>
+    <td>
+      <%= image_tag swf.image.url %><br/>
+      <%= swf.name %>
+    </td>
     <td><%= swf.web %></td>
-    <td><%= swf.url %></td>
+    <td><b><%= swf.url %></b></td>
     <td><%= link_to 'Show', swf %></td>
     <td><%= link_to 'Edit', edit_swf_path(swf) %></td>
     <td><%= link_to 'Destroy', swf, :confirm => 'Are you sure?', :method => :delete %></td>

@@ -30,22 +30,26 @@ class Com7k7k < Spader
 
   def find_url
     # 根据css获取所有游戏的link
-    #  links = @page.css(Com7k7k::CSS2) + @page.css(Com7k7k::CSS3)
-    #  links.each do |link|
-    #    game_url = link.children.children[0].attributes['href'].value
-    #    # 直接到游戏页面的链接,分为以flash和/special开头
-    #    if game_url.start_with?('flash/')
-    #      img_link = link.children.children.children[0].attributes
-    #      img_url = img_link.has_key?('lz_src') ? img_link['lz_src'].value : img_link['src'].value
-    #      game_name = link.children.children.children[0]['alt']
-    #      puts game_name
-    #      puts img_url
-    #      # 直接从页面中的js中获取下载地址
-    #      swf_url = download_url_from_js(Com7k7k::WEB + game_url)
-    #      puts swf_url
-    #      puts '------------------------------'
-    #    end
-    #  end
+    links = @page.css(Com7k7k::CSS2) + @page.css(Com7k7k::CSS3)
+    links.each do |link|
+      game_url = link.children.children[0].attributes['href'].value
+      # 直接到游戏页面的链接,分为以flash和/special开头
+      if game_url.start_with?('flash/')
+        img_link = link.children.children.children[0].attributes
+        img_url = img_link.has_key?('lz_src') ? img_link['lz_src'].value : img_link['src'].value
+        game_name = link.children.children.children[0]['alt']
+
+        if Swf.find_by_name(game_name).nil?
+          # 直接从页面中的js中获取下载地址
+          swf_url = download_url_from_js(Com7k7k::WEB + game_url)
+          Swf.create(:name => game_name, :url => swf_url, :image_url => img_url, :web => (Com7k7k::WEB + game_url)) unless swf_url.nil?
+          puts game_name
+          puts swf_url
+          puts img_url
+          puts '------------------------------'
+        end
+      end
+    end
   
     # 获取首页所有链接以 tag/ 开始的专题
     tags = @page.css(Com7k7k::CSS1)
@@ -56,10 +60,10 @@ class Com7k7k < Spader
       swfs = get_game_url_from_category(tag.attributes['href'].value)
         
       swfs.each do |swf|
+        swf_url = download_url_from_js(swf[2])
+        Swf.create(:name => swf[0], :url => swf_url, :image_url => swf[1], :web => swf[2]) unless swf_url.nil?
         puts swf[0]
         puts swf[1]
-        puts swf[2]
-        swf_url = download_url_from_js(swf[2])
         puts swf_url
         puts '------------------------------'
       end
@@ -85,11 +89,7 @@ class Com7k7k < Spader
 
     js = game_page.search('script').detect {|j| j.children[0].to_s.include?('_gamepath')}
     unless js.to_s.scan(/_gamepath\s=\s\"(.*\.(swf|html|htm|dcr))/).empty?
-      if $2 == 'swf'
-        download_url = $1
-      else
-        "为 .#{$2} 的链接，忽略"
-      end
+    download_url = ($2 == 'swf') ? $1 : nil
     end
   end
 
@@ -117,9 +117,11 @@ class Com7k7k < Spader
     page.css(Com7k7k::CSS4).each do |link|
       # 将每个游戏对应的名称 图片 url组成一个数组，在将所有这样的数组放在一个大数组中
       name = link.children.children[0].attributes['title'].value
-      img = link.children.children.children[0].attributes['src'].value
-      flash = Com7k7k::URL + link.children.children[0].attributes['href'].value
-      swfs << [name, img, flash]
+      if Swf.find_by_name(name).nil?
+        img = link.children.children.children[0].attributes['src'].value
+        flash = Com7k7k::URL + link.children.children[0].attributes['href'].value
+        swfs << [name, img, flash]
+      end
     end
     swfs
   end

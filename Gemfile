@@ -15,7 +15,7 @@ gem 'resque', :require => 'resque/server'
 
 gem 'SystemTimer'
 
-gem 'whenever'
+gem 'whenever', :require => false
 
 gem 'will_paginate' , '~> 2.3.15'
 

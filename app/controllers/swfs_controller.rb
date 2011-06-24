@@ -10,7 +10,13 @@ class SwfsController < ApplicationController
   # GET /swfs
   # GET /swfs.xml
   def index
-    @swfs = Swf.all.paginate :per_page => 20, :page => params[:page], :limit => 50
+    if params[:search]
+      cond = ["name like ?", "%#{params[:search]}%"]
+      all_swfs = Swf.where(cond)
+    else
+      all_swfs = Swf.all
+    end
+    @swfs = all_swfs.paginate :per_page => 20, :page => params[:page], :limit => 50
 
     respond_to do |format|
       format.html # index.html.erb
