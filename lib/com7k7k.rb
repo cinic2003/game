@@ -19,7 +19,7 @@ require 'rubygems'
 
 class Com7k7k < Spader
   
-  module Com7k7k
+  module COM7k7k
     WEB = 'http://www.7k7k.com/'
     URL = 'http://www.7k7k.com'
     CSS1 = '.tag dl dd a'
@@ -30,7 +30,7 @@ class Com7k7k < Spader
 
   def find_url
     # 根据css获取所有游戏的link
-    links = @page.css(Com7k7k::CSS2) + @page.css(Com7k7k::CSS3)
+    links = @page.css(COM7k7k::CSS2) + @page.css(COM7k7k::CSS3)
     links.each do |link|
       game_url = link.children.children[0].attributes['href'].value
       # 直接到游戏页面的链接,分为以flash和/special开头
@@ -41,8 +41,8 @@ class Com7k7k < Spader
 
         if Swf.find_by_name(game_name).nil?
           # 直接从页面中的js中获取下载地址
-          swf_url = download_url_from_js(Com7k7k::WEB + game_url)
-          Swf.create(:name => game_name, :url => swf_url, :image_url => img_url, :web => (Com7k7k::WEB + game_url)) unless swf_url.nil?
+          swf_url = download_url_from_js(COM7k7k::WEB + game_url)
+          Swf.create(:name => game_name, :url => swf_url, :image_url => img_url, :web => (COM7k7k::WEB + game_url)) unless swf_url.nil?
           puts game_name
           puts swf_url
           puts img_url
@@ -52,7 +52,7 @@ class Com7k7k < Spader
     end
   
     # 获取首页所有链接以 tag/ 开始的专题
-    tags = @page.css(Com7k7k::CSS1)
+    tags = @page.css(COM7k7k::CSS1)
     tags.each do |tag|
       puts "专题: #{tag.children.text}"
 
@@ -82,9 +82,9 @@ class Com7k7k < Spader
       retry_count += 1
       retry_count < 10 ? retry : next
     rescue Errno::ECONNREFUSED
-      sleep 50
-      retry_count += 1
-      retry_count < 10 ? retry : next
+      puts 'Connect Refused------------'
+    rescue EOFError
+      puts 'EOFFErrot <<<<<<<<<<<<<<<<<<'
     end
 
     js = game_page.search('script').detect {|j| j.children[0].to_s.include?('_gamepath')}
@@ -95,7 +95,7 @@ class Com7k7k < Spader
 
   def get_game_url_from_category(url)
     # 通过某一专题页面 查找该页面中的游戏链接
-    tag_url = Com7k7k::WEB + url
+    tag_url = COM7k7k::WEB + url
     page = Nokogiri::HTML(open tag_url)
     swfs = []
     swfs += find_games(page)
@@ -114,12 +114,12 @@ class Com7k7k < Spader
 
   def find_games(page)
     swfs = []
-    page.css(Com7k7k::CSS4).each do |link|
+    page.css(COM7k7k::CSS4).each do |link|
       # 将每个游戏对应的名称 图片 url组成一个数组，在将所有这样的数组放在一个大数组中
       name = link.children.children[0].attributes['title'].value
       if Swf.find_by_name(name).nil?
         img = link.children.children.children[0].attributes['src'].value
-        flash = Com7k7k::URL + link.children.children[0].attributes['href'].value
+        flash = COM7k7k::URL + link.children.children[0].attributes['href'].value
         swfs << [name, img, flash]
       end
     end
