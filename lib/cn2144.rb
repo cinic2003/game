@@ -1,8 +1,6 @@
 # encoding: utf-8
 
-require 'rubygems'
-require 'nokogiri'
-require 'open-uri'
+require 'spader'
 
 # 首页列表中的游戏
 # 有游戏链接、图片链接、游戏名称 RECOMMAND_CONT CSS1
@@ -17,7 +15,7 @@ require 'open-uri'
 # 2. /html/xxxx
 # 3. http//
 
-class Cn2144
+class Cn2144 < Spader
 
   module CN2144
     URL = 'http://www.2144.cn'
@@ -45,27 +43,31 @@ class Cn2144
 
     # 游戏 可直接获取图片 名称和该游戏链接
     links.each do |link|
-      url = link.attributes['href'].value
+      # 如果已保存则忽略
       name = link.children.text
-      if Swf.find_by_name(name).nil?
-        image = link.children[0].attributes
-        image_url = image.has_key?('src') ? image['src'].value : (CN2144::IMG_URL + image['a'].value)
+      next if SWf.find_by_name(name)
+      
+      url = link.attributes['href'].value
+      image = link.children[0].attributes
+      image_url = image.has_key?('src') ? image['src'].value : (CN2144::IMG_URL + image['a'].value)
 
-        puts name 
-        puts image_url
+      # 通过分析游戏页面的js获取swf的url
+      if url.start_with?('/html/')
+        game_url = CN2144::URL + url
+        # swf_url = find_swf_url(game_url)
+        swf_url = get_swf_url_from_js(game_url, 'game_filename', /game_filename=\'(.*\.(swf|htm))/)
 
-        # 通过分析游戏页面的js获取swf的url
-        if url.start_with?('/html/')
-          game_url = CN2144::URL + url
-          swf_url = find_swf_url(game_url)
-        else
-          swf_url = ''
+        unless swf_url.nil?
+          Swf.create do |swf|
+            swf.name = name
+            swf.iamge_url = image_url
+            swf.url = swf_url
+            puts name 
+            puts image_url
+            puts swf_url
+            puts '----------------------'
+          end
         end
-        Swf.create(:name => name, 
-                   :image_url => image_url,
-                   :url => swf_url) unless swf_url.blank?
-        puts swf_url
-        puts '---------------'
       end
     end
 
@@ -117,12 +119,12 @@ class Cn2144
     swfs = []
     links.each do |link|
       name = link.children.text
-      if Swf.find_by_name(name).nil?
-        image_url = link.children[0].attributes['src'].value
-        game_url = CN2144::URL + link.attributes['href']
-        swf_url = find_swf_url(game_url)
-        swfs << [name, image_url, swf_url]
-      end
+      # 忽略已保存过的
+      next if Swf.find_by_name(name)
+      image_url = link.children[0].attributes['src'].value
+      game_url = CN2144::URL + link.attributes['href']
+      swf_url = find_swf_url(game_url)
+      swfs << [name, image_url, swf_url]
     end
     swfs
   end
@@ -137,7 +139,7 @@ class Cn2144
     rescue EOFError
       puts 'EOFFEroot >>>>>>>>>>>>>>>>>>>>>>>'
     end
-
+rescue Errno::ECONNREFUSED
     js = game_page.search('script').detect {|js| js.to_s.include?('game_filename')}
     unless js.to_s.scan(/game_filename=\'(.*\.(swf|htm))/).empty?
       swf_url = ($2 == 'swf') ? $1 : nil
@@ -150,5 +152,6 @@ end
 
 if __FILE__ == $0
   require "#{File.dirname(__FILE__)}/../config/environment"
-  Cn2144.new.find_swf
+  url = 'http://www.2144.cn'
+  Cn2144.new(url, 'gb2312').find_swf
 end
